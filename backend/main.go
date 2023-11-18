@@ -36,19 +36,33 @@ func hello(w http.ResponseWriter, r *http.Request) {
 // "sht_humid": 5,
 // "sht_temp": 5
 // }
-type DataModel struct {
-	Time     string  `json:"time"`
-	Temp1    float32 `json:"temp1"`
-	Temp2    float32 `json:"temp2"`
-	Temp3    float32 `json:"temp3"`
-	Temp4    float32 `json:"temp4"`
-	Temp5    float32 `json:"temp5"`
-	Temp6    float32 `json:"temp6"`
+//
+
+type SolSensor struct {
+	Temp1 float32 `json:"temp1"`
+	Temp2 float32 `json:"temp2"`
+	Temp3 float32 `json:"temp3"`
+	Temp4 float32 `json:"temp4"`
+	Temp5 float32 `json:"temp5"`
+	Temp6 float32 `json:"temp6"`
+}
+
+type EnvSensor struct {
 	EnvTemp  float32 `json:"env_temp"`
 	EnvHumid float32 `json:"env_humid"`
 	EnvLux   float32 `json:"env_lux"`
+}
+
+type ShtSensor struct {
 	ShtHumid float32 `json:"sht_humid"`
 	ShtTemp  float32 `json:"sht_temp"`
+}
+
+type DataModel struct {
+	Time      string `json:"time"`
+	SolSensor `json:"sol"`
+	EnvSensor `json:"env"`
+	ShtSensor `json:"sht"`
 }
 
 var data []DataModel = make([]DataModel, 0)
