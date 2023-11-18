@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,6 +12,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/joho/godotenv"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type application struct {
@@ -202,9 +206,25 @@ func (app *application) routes() http.Handler {
 
 func main() {
 	addr := ":3000"
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	dbPass := os.Getenv("MYSQL_PASS")
+	dbUser := os.Getenv("MYSQL_USER")
+	dsn := fmt.Sprintf("%s:%s@/sensor_readings?parseTime=true", dbUser, dbPass)
+	fmt.Println("dsn: ", dsn)
 
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+
+	db, err := openDB(dsn)
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
+	defer db.Close()
 
 	app := &application{
 		errorLog: errorLog,
@@ -218,8 +238,21 @@ func main() {
 	}
 
 	infoLog.Printf("Starting server on %s", addr)
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	errorLog.Fatal(err)
 
 	srv.ListenAndServe()
+}
+
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Connected to DB!")
+	return db, nil
 }
