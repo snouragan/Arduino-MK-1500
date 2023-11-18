@@ -22,8 +22,6 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello brothers!"))
 }
 
-var data map[string]string = map[string]string{}
-
 // Data will be of the follwing format:
 // {
 // "temp1" : 69,
@@ -39,6 +37,7 @@ var data map[string]string = map[string]string{}
 // "sht_temp": 5
 // }
 type DataModel struct {
+	Time     string  `json:"time"`
 	Temp1    float32 `json:"temp1"`
 	Temp2    float32 `json:"temp2"`
 	Temp3    float32 `json:"temp3"`
@@ -51,6 +50,8 @@ type DataModel struct {
 	ShtHumid float32 `json:"sht_humid"`
 	ShtTemp  float32 `json:"sht_temp"`
 }
+
+var data []DataModel = make([]DataModel, 0)
 
 func WriteData(w http.ResponseWriter, r *http.Request) {
 	// Declare a new Person struct.
@@ -68,7 +69,14 @@ func WriteData(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Data: %+v", d)
 	// current timestamp
 	curr := fmt.Sprintf("%d", time.Now().Unix())
-	data[curr] = fmt.Sprintf("%+v", d)
+	d.Time = curr
+	// marshaledData, err := json.Marshal(&d)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+
+	data = append(data, d)
 
 	fmt.Printf("Data: %+v", data)
 
